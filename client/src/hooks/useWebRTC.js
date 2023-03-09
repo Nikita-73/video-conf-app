@@ -17,6 +17,7 @@ export default function useWebRTC(roomID) {
 
     const peerConnections = useRef({})
     const localMediaStream = useRef(null)
+    const localMediaStreamAudio = useRef(null) // только под аудио микрофона
     const peerMediaElement = useRef({
         [LOCAL_VIDEO]: null
     })
@@ -152,6 +153,7 @@ export default function useWebRTC(roomID) {
                 if (localVideoElement) {
                     localVideoElement.volume = 0
                     localVideoElement.srcObject = localMediaStream.current
+                    localMediaStreamAudio.current = localMediaStream.current // работает аудио микрофона
                 }
             })
         }
@@ -168,7 +170,7 @@ export default function useWebRTC(roomID) {
     }, [roomID])//так а зачем, при переходе на новую страницу все перересовывается
 
     const microphoneOff = function(){
-        const [audioTrack] = localMediaStream.current.getAudioTracks()
+        const [audioTrack] = localMediaStreamAudio.current.getAudioTracks()
         debugger
         if (audioTrack) {
             audioTrack.enabled = false
@@ -176,7 +178,7 @@ export default function useWebRTC(roomID) {
     };
 
     const microphoneOn = function(){
-        const [audioTrack] = localMediaStream.current.getAudioTracks()
+        const [audioTrack] = localMediaStreamAudio.current.getAudioTracks()
         debugger
         if (audioTrack) {
             audioTrack.enabled = true
