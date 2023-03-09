@@ -41,10 +41,11 @@ export default function useWebRTC(roomID) {
 
             let tracksNumber = 0
             peerConnections.current[peerID].ontrack = ({streams: [remoteStream]}) => {
-
                 tracksNumber++
 
-                if (tracksNumber === 2) { // video & audio tracks received
+                if (tracksNumber === 2) {// video & audio tracks received
+                    tracksNumber = 0
+
                     addNewClient(peerID, () => {
                         peerMediaElement.current[peerID].srcObject = remoteStream
                     })
@@ -135,7 +136,6 @@ export default function useWebRTC(roomID) {
     }, []);
 
 
-
     useEffect(() => {
         async function startCapture() {
             localMediaStream.current = await navigator.mediaDevices.getUserMedia({
@@ -164,15 +164,87 @@ export default function useWebRTC(roomID) {
             localMediaStream.current.getTracks().forEach(track => track.stop())
             socket.emit(ACTIONS.LEAVE)
         }
+
     }, [roomID])//так а зачем, при переходе на новую страницу все перересовывается
+
+    const microphoneOff = function(){
+        const [audioTrack] = localMediaStream.current.getAudioTracks()
+        debugger
+        if (audioTrack) {
+            audioTrack.enabled = false
+        }
+    };
+
+    const microphoneOn = function(){
+        const [audioTrack] = localMediaStream.current.getAudioTracks()
+        debugger
+        if (audioTrack) {
+            audioTrack.enabled = true
+        }
+
+    };
+
+    const videoOff = function(){
+        const [videoTrack] = localMediaStream.current.getVideoTracks()
+       //debugger
+        if (videoTrack) {
+            videoTrack.enabled = false;
+        }
+    };
+
+    const videoOn = function(){
+        const [videoTrack] = localMediaStream.current.getVideoTracks()
+        //debugger
+        if (videoTrack) {
+            videoTrack.enabled = true;
+        }
+    };
+
+    const captureScreen = async function(){
+        try {
+             const stream = await navigator.mediaDevices.getDisplayMedia({
+                audio: true,
+                video: {
+                    width: 1280,
+                    height: 720,
+                    cursor: "always"
+                },
+            })
+            const [videoTrack] = stream.getVideoTracks()
+            console.log(localMediaStream.current)
+            console.log(peerMediaElement.current['LOCAL_VIDEO'].srcObject)
+            peerMediaElement.current['LOCAL_VIDEO'].srcObject = stream;
+            for (const pc in peerConnections.current){
+                console.log(peerConnections.current[pc])
+                const sender = peerConnections.current[pc]
+                    .getSenders()
+                    .find((s) => s.track.kind === videoTrack.kind);
+                //console.log("Found sender:", sender);
+                await sender.replaceTrack(videoTrack);
+            }
+            localMediaStream.current = stream
+            console.log(localMediaStream.current)
+            debugger
+
+        } catch (ex) {
+            console.log("Error occurred", ex);
+        }
+    }
+
 
     const provideMediaRef = useCallback((id, node) => {
         peerMediaElement.current[id] = node
     }, [])
 
+
     return{
         clients,
-        provideMediaRef
+        provideMediaRef,
+        microphoneOff,
+        microphoneOn,
+        videoOff,
+        videoOn,
+        captureScreen
     }
 
 }

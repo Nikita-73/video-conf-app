@@ -35,7 +35,7 @@ function layout(clientsNumber = 1) {
 
 const Room = () => {
     const {id: roomID} = useParams();
-    const {clients, provideMediaRef} = useWebRTC(roomID);
+    const {clients, provideMediaRef, microphoneOff, microphoneOn, videoOff, videoOn, captureScreen} = useWebRTC(roomID);
     const videoLayout = layout(clients.length);
 
     return (
@@ -59,6 +59,11 @@ const Room = () => {
                             playsInline
                             muted={clientID === LOCAL_VIDEO}
                         />
+                        <button onClick={microphoneOff}>MicroOff</button>
+                        <button onClick={microphoneOn}>MicroOn</button>
+                        <button onClick={videoOff}>videoOff</button>
+                        <button onClick={videoOn}>videoOn</button>
+                        <button onClick={captureScreen}>CaptureScreen</button>
                     </div>
                 );
             })}
