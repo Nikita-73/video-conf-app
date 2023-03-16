@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef} from "react";
 import useStateWithCallback from "./useStateWithCallback";
-import socket from "../socket";
+import socket from "../socket/index";
 import ACTIONS from '../socket/actions'
 import freeice from 'freeice'
 
@@ -17,7 +17,6 @@ export default function useWebRTC(roomID) {
 
     const peerConnections = useRef({})
     const localMediaStream = useRef(null)
-    const localMediaStreamAudio = useRef(null) // только под аудио микрофона
     const peerMediaElement = useRef({
         [LOCAL_VIDEO]: null
     })
@@ -72,7 +71,11 @@ export default function useWebRTC(roomID) {
         }
 
         socket.on(ACTIONS.ADD_PEER, handleNewPeer);
-    })
+
+        return () => {
+            socket.off(ACTIONS.ADD_PEER);
+        }
+    }, [])
 
 
     useEffect(() => {
@@ -138,6 +141,7 @@ export default function useWebRTC(roomID) {
 
 
     useEffect(() => {
+
         async function startCapture() {
             localMediaStream.current = await navigator.mediaDevices.getUserMedia({
                 audio: true,
@@ -153,14 +157,18 @@ export default function useWebRTC(roomID) {
                 if (localVideoElement) {
                     localVideoElement.volume = 0
                     localVideoElement.srcObject = localMediaStream.current
-                    localMediaStreamAudio.current = localMediaStream.current // работает аудио микрофона
                 }
             })
         }
 
-        startCapture()
-            .then(() => socket.emit(ACTIONS.JOIN, {room: roomID}))
-            .catch(e => console.error('Error getting userMedia', e))
+
+        const startCaptureDone = startCapture()
+
+        socket.on(ACTIONS.WEBRTC_ON, () => {
+            startCaptureDone
+               .then(() => socket.emit(ACTIONS.JOIN, {room: roomID}))
+               .catch(e => console.error('Error getting userMedia', e))
+       })
 
         return () => {
             localMediaStream.current.getTracks().forEach(track => track.stop())
@@ -169,67 +177,63 @@ export default function useWebRTC(roomID) {
 
     }, [roomID])//так а зачем, при переходе на новую страницу все перересовывается
 
-    const microphoneOff = function(){
-        const [audioTrack] = localMediaStreamAudio.current.getAudioTracks()
-        debugger
-        if (audioTrack) {
+    const microphoneLocal = function(selector){ // вкючение выключение локального микрофона
+        const [audioTrack] = localMediaStream.current.getAudioTracks()
+        if (audioTrack && selector) {
             audioTrack.enabled = false
-        }
-    };
-
-    const microphoneOn = function(){
-        const [audioTrack] = localMediaStreamAudio.current.getAudioTracks()
-        debugger
-        if (audioTrack) {
+        } if (audioTrack && !selector) {
             audioTrack.enabled = true
         }
 
     };
 
-    const videoOff = function(){
+    const videoLocal = function(selector){ // вкючение выключение локального видео
         const [videoTrack] = localMediaStream.current.getVideoTracks()
-       //debugger
-        if (videoTrack) {
-            videoTrack.enabled = false;
+        if (videoTrack && selector) {
+            videoTrack.enabled = false
+        } if (videoTrack && !selector) {
+            videoTrack.enabled = true
         }
     };
 
-    const videoOn = function(){
-        const [videoTrack] = localMediaStream.current.getVideoTracks()
-        //debugger
-        if (videoTrack) {
-            videoTrack.enabled = true;
-        }
-    };
 
-    const captureScreen = async function(){
-        try {
-             const stream = await navigator.mediaDevices.getDisplayMedia({
-                audio: true,
-                video: {
-                    width: 1280,
-                    height: 720,
-                    cursor: "always"
-                },
-            })
-            const [videoTrack] = stream.getVideoTracks()
-            console.log(localMediaStream.current)
-            console.log(peerMediaElement.current['LOCAL_VIDEO'].srcObject)
-            peerMediaElement.current['LOCAL_VIDEO'].srcObject = stream;
-            for (const pc in peerConnections.current){
-                console.log(peerConnections.current[pc])
-                const sender = peerConnections.current[pc]
-                    .getSenders()
-                    .find((s) => s.track.kind === videoTrack.kind);
-                //console.log("Found sender:", sender);
-                await sender.replaceTrack(videoTrack);
+    const captureScreenLocal = async function(selector){ // изменения захвата видео (меняем только видео без аудио дорожки)
+        if (selector) {
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    audio: true,
+                    video: {
+                        width: 1280,
+                        height: 720,
+                        cursor: "always"
+                    },
+                })
+                const [videoTrack] = stream.getVideoTracks()
+                peerMediaElement.current['LOCAL_VIDEO'].srcObject = stream;
+                for (const pc in peerConnections.current) {
+                    const sender = peerConnections.current[pc]
+                        .getSenders()
+                        .find((s) => s.track.kind === videoTrack.kind);
+                    await sender.replaceTrack(videoTrack);
+                }
+            } catch (e) {
+                console.log("Error occurred", e);
             }
-            localMediaStream.current = stream
-            console.log(localMediaStream.current)
-            debugger
+        } if (!selector) {
+            try {
+                const [videoTrack] = localMediaStream.current.getVideoTracks()
+                peerMediaElement.current['LOCAL_VIDEO'].srcObject = localMediaStream.current;
+                for (const pc in peerConnections.current) {
+                    console.log(peerConnections.current[pc])
+                    const sender = peerConnections.current[pc]
+                        .getSenders()
+                        .find((s) => s.track.kind === videoTrack.kind);
+                    await sender.replaceTrack(videoTrack);
+                }
+            } catch (e) {
+                console.log("Error occurred", e);
+            }
 
-        } catch (ex) {
-            console.log("Error occurred", ex);
         }
     }
 
@@ -242,11 +246,9 @@ export default function useWebRTC(roomID) {
     return{
         clients,
         provideMediaRef,
-        microphoneOff,
-        microphoneOn,
-        videoOff,
-        videoOn,
-        captureScreen
+        microphoneLocal,
+        videoLocal,
+        captureScreenLocal
     }
 
 }

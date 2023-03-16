@@ -7,5 +7,5 @@ const options = {
     transport: ['websocket'],
 }
 
-const socket = io('ws://192.168.0.141:3001', options)
+const socket = io('wss://192.168.0.141:3001', options)
 export default socket

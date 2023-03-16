@@ -18,6 +18,25 @@ const Main = () => {
         })
     }, [])
 
+
+    const createNewRoom = function(){
+        const roomIDHost = v4()
+        history.push(`/room/${roomIDHost}`)
+        socket.emit(ACTIONS.HOST_ROOM, {
+            roomIDHost,
+            hostID: socket.id
+        })
+        socket.emit(ACTIONS.MEMBER_PASS_DONE, {id: socket.id})
+    }
+
+    const joiningRoom = function(roomID){
+        history.push(`/room/${roomID}`)
+        socket.emit(ACTIONS.CALL_HOST, {
+            roomIDMember: roomID,
+            memberID: socket.id
+        })
+    }
+
     return (
         <div>
             <h1>Available Rooms</h1>
@@ -25,14 +44,11 @@ const Main = () => {
                 {rooms.map(roomID => (
                     <li key={roomID}>
                         {roomID}
-                        <button onClick={() => {
-                            history.push(`/room/${roomID}`);
-                        }}>JOIN ROOM</button>
+                        <button onClick={() => {joiningRoom(roomID)}}>JOIN ROOM</button>
                     </li>
                 ))}
             </ul>
-            <button onClick={() => {history.push(`/room/${v4()}`)
-            }}>Create new room</button>
+            <button onClick={createNewRoom}>Create new room</button>
         </div>
     );
 };

@@ -1,6 +1,8 @@
-import React from 'react';
+import {useState, useEffect} from 'react';
 import {useParams} from "react-router";
 import useWebRTC, {LOCAL_VIDEO} from "../../hooks/useWebRTC";
+import ACTIONS from "../../socket/actions";
+import socket from "../../socket/index";
 
 
 function layout(clientsNumber = 1) {
@@ -35,8 +37,49 @@ function layout(clientsNumber = 1) {
 
 const Room = () => {
     const {id: roomID} = useParams();
-    const {clients, provideMediaRef, microphoneOff, microphoneOn, videoOff, videoOn, captureScreen} = useWebRTC(roomID);
+    const {clients, provideMediaRef, microphoneLocal, videoLocal, captureScreenLocal} = useWebRTC(roomID);
     const videoLayout = layout(clients.length);
+
+    const [stateMic, setStateMic] = useState(true)
+    const [stateVideo, setStateVideo] = useState(true)
+    const [stateCapture, setStateCapture] = useState(true)
+
+    const microphoneChange = function(){
+        microphoneLocal(stateMic)
+        setStateMic(prev => !prev)
+    }
+
+    const videoChange = function(){
+        videoLocal(stateVideo)
+        setStateVideo(prev => !prev)
+    }
+
+    const captureChange = function(){
+        captureScreenLocal(stateCapture)
+        setStateCapture(prev => !prev)
+    }
+
+    useEffect(() => {
+        socket.on(ACTIONS.MEMBER_CONNECT,  ({memberID}) => {
+            console.log('pustite')
+            if(window.confirm(`Пустить клиента ${memberID}`)) {
+                console.log('ок')
+
+
+                socket.emit(ACTIONS.MEMBER_PASS, {memberID})
+
+
+            }
+        })
+
+        socket.on(ACTIONS.JOIN_ROOM, () => {
+            console.log('я вернулся')
+            socket.emit(ACTIONS.MEMBER_PASS_DONE, {id: socket.id})
+        })
+
+    }, [])
+
+
 
     return (
         <div style={{
@@ -59,11 +102,9 @@ const Room = () => {
                             playsInline
                             muted={clientID === LOCAL_VIDEO}
                         />
-                        <button onClick={microphoneOff}>MicroOff</button>
-                        <button onClick={microphoneOn}>MicroOn</button>
-                        <button onClick={videoOff}>videoOff</button>
-                        <button onClick={videoOn}>videoOn</button>
-                        <button onClick={captureScreen}>CaptureScreen</button>
+                        <button onClick={microphoneChange}>Micro On/Off</button>
+                        <button onClick={videoChange}>Video On/Off</button>
+                        <button onClick={captureChange}>CaptureScreen On/Off</button>
                     </div>
                 );
             })}
