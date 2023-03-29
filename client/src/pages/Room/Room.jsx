@@ -3,42 +3,16 @@ import {useParams} from "react-router";
 import useWebRTC, {LOCAL_VIDEO} from "../../hooks/useWebRTC";
 import ACTIONS from "../../socket/actions";
 import socket from "../../socket/index";
+import {Grid, Button, Box, AppBar, Toolbar, Typography, ButtonGroup } from '@mui/material';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 
-function layout(clientsNumber = 1) {
-    const pairs = Array.from({length: clientsNumber})
-        .reduce((acc, next, index, arr) => {
-            if (index % 2 === 0) {
-                acc.push(arr.slice(index, index + 2));
-            }
 
-            return acc;
-        }, []);
-
-    const rowsNumber = pairs.length;
-    const height = `${100 / rowsNumber}%`;
-
-    return pairs.map((row, index, arr) => {
-
-        if (index === arr.length - 1 && row.length === 1) {
-            return [{
-                width: '100%',
-                height,
-            }];
-        }
-
-        return row.map(() => ({
-            width: '50%',
-            height,
-        }));
-    }).flat();
-}
 
 
 const Room = () => {
     const {id: roomID} = useParams();
     const {clients, provideMediaRef, microphoneLocal, videoLocal, captureScreenLocal} = useWebRTC(roomID);
-    const videoLayout = layout(clients.length);
 
     const [stateMic, setStateMic] = useState(true)
     const [stateVideo, setStateVideo] = useState(true)
@@ -82,33 +56,57 @@ const Room = () => {
 
 
     return (
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            height: '100vh',
+        <Box sx={{
+            height: '100%',
+            position: 'relative'
         }}>
-            {clients.map((clientID, index) => {
-                return (
-                    <div key={clientID} style={videoLayout[index]} id={clientID}>
-                        <video
-                            width='100%'
-                            height='100%'
-                            ref={instance => {
-                                provideMediaRef(clientID, instance);
-                            }}
-                            autoPlay
-                            playsInline
-                            muted={clientID === LOCAL_VIDEO}
-                        />
-                        <button onClick={microphoneChange}>Micro On/Off</button>
-                        <button onClick={videoChange}>Video On/Off</button>
-                        <button onClick={captureChange}>CaptureScreen On/Off</button>
-                    </div>
-                );
-            })}
-        </div>
+            <AppBar position='static'>
+                    <Toolbar sx={{minHeight: '50px !important', justifyContent: 'space-between'}}>
+                            <Typography
+                                variant="h6"
+                            >
+                                Video Chat
+                            </Typography>
+                        <ButtonGroup size="small" aria-label="small button group" variant='text'  sx={{
+                            backgroundColor: 'red',
+                        }}>
+                            <Button onClick={microphoneChange}>Micro On/Off</Button>
+                            <Button onClick={videoChange}>Video On/Off</Button>
+                            <Button onClick={captureChange}>CaptureScreen On/Off</Button>
+                        </ButtonGroup>
+                        <ExitToAppIcon/>
+                    </Toolbar>
+            </AppBar>
+
+
+
+            <Box sx={{
+                marginTop: '10px',
+                width: '80%',
+                height: '100%',
+                margin: 'auto'
+
+            }}>
+                <Grid container spacing={2}>
+                    {clients.map((clientID) => {
+                        return (
+                            <Grid item xs={12} md={6} key={clientID} id={clientID}>
+                                <video
+                                    width='100%'
+                                    height='100%'
+                                    ref={instance => {
+                                        provideMediaRef(clientID, instance);
+                                    }}
+                                    autoPlay
+                                    playsInline
+                                    muted={clientID === LOCAL_VIDEO}
+                                />
+                            </Grid>
+                        );
+                    })}
+                </Grid>
+            </Box>
+        </Box>
     );
 };
 

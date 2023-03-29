@@ -27,7 +27,6 @@ export default function useWebRTC(roomID) {
             if (peerID in peerConnections.current) {
                 return console.warn(`Already connected to peer${peerID}`)
             }
-
             peerConnections.current[peerID] = new RTCPeerConnection({iceServers: freeice()})
 
             peerConnections.current[peerID].onicecandidate = event => {
@@ -43,11 +42,28 @@ export default function useWebRTC(roomID) {
             peerConnections.current[peerID].ontrack = ({streams: [remoteStream]}) => {
                 tracksNumber++
 
-                if (tracksNumber === 2) {// video & audio tracks received
+                if (tracksNumber === 2) { // video & audio tracks received
                     tracksNumber = 0
 
-                    addNewClient(peerID, () => {
-                        peerMediaElement.current[peerID].srcObject = remoteStream
+                    console.log(remoteStream)
+
+                    addNewClient(peerID, async () => {
+                        console.log('Hi')
+                            // fix long render in case of many clients
+                            await new Promise((resolve) => {
+                                let settled = false;
+                                const interval = setInterval(() => {
+                                    if (peerMediaElement.current[peerID] && remoteStream.addTrack.length === 1) {
+                                        console.log('234')
+                                        peerMediaElement.current[peerID].srcObject = remoteStream;
+                                        settled = true;
+                                        resolve()
+                                    }
+                                    if (settled) {
+                                        clearInterval(interval);
+                                    }
+                                }, 1000);
+                            })
                     })
                 }
             }
@@ -88,7 +104,6 @@ export default function useWebRTC(roomID) {
             if (remoteDescription.type === 'offer') {
                 const answer = await peerConnections.current[peerID].createAnswer();
 
-                console.log(clients)
 
                 await peerConnections.current[peerID].setLocalDescription(answer);
 
@@ -143,13 +158,18 @@ export default function useWebRTC(roomID) {
     useEffect(() => {
 
         async function startCapture() {
-            localMediaStream.current = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: {
-                    width: 1280,
-                    height: 720
-                }
-            })
+            try {
+                localMediaStream.current = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: {
+                        width: 1280,
+                        height: 720
+                    }
+                })
+            } catch (e) {
+                console.log(e)
+            }
+
 
             addNewClient(LOCAL_VIDEO, () => {
                 const localVideoElement = peerMediaElement.current[LOCAL_VIDEO]
@@ -203,8 +223,8 @@ export default function useWebRTC(roomID) {
                 const stream = await navigator.mediaDevices.getDisplayMedia({
                     audio: true,
                     video: {
-                        width: 1280,
-                        height: 720,
+                        width: 1980,
+                        height: 1080,
                         cursor: "always"
                     },
                 })

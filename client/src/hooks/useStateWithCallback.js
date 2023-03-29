@@ -1,8 +1,10 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 
+
 const useStateWithCallback = (initialState) => {
     const [state, setState] = useState(initialState)
     const cbRef = useRef(null)
+
 
     const updateState = useCallback((newState, cb) => {
         cbRef.current = cb
@@ -10,11 +12,16 @@ const useStateWithCallback = (initialState) => {
         setState(prevState => typeof newState === 'function' ? newState(prevState) : newState)
     }, [])
 
-    useEffect(() => {
+    const cbAsync = async () => {
         if (cbRef.current) {
-            cbRef.current(state)
+            await cbRef.current()
             cbRef.current = null
         }
+    }
+
+    useEffect(() => {
+        cbAsync()
+
     }, [state])
 
     return [state, updateState]

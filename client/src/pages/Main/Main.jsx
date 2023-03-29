@@ -3,6 +3,7 @@ import socket from "../../socket";
 import ACTIONS from '../../socket/actions';
 import {useHistory} from "react-router";
 import {v4} from 'uuid'
+import MainTemplateUI from '../Main/MainTemplateUI'
 
 const Main = () => {
 
@@ -39,7 +40,14 @@ const Main = () => {
 
     return (
         <div>
-            <h1>Available Rooms</h1>
+            <MainTemplateUI joiningRoom={joiningRoom} createNewRoom={createNewRoom}/>
+        </div>
+    );
+};
+
+export default Main;
+
+/*  <h1>Available Rooms</h1>
             <ul>
                 {rooms.map(roomID => (
                     <li key={roomID}>
@@ -48,9 +56,4 @@ const Main = () => {
                     </li>
                 ))}
             </ul>
-            <button onClick={createNewRoom}>Create new room</button>
-        </div>
-    );
-};
-
-export default Main;
+            <button onClick={createNewRoom}>Create new room</button>*/
