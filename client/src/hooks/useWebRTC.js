@@ -45,16 +45,13 @@ export default function useWebRTC(roomID) {
                 if (tracksNumber === 2) { // video & audio tracks received
                     tracksNumber = 0
 
-                    console.log(remoteStream)
 
                     addNewClient(peerID, async () => {
-                        console.log('Hi')
                             // fix long render in case of many clients
                             await new Promise((resolve) => {
                                 let settled = false;
                                 const interval = setInterval(() => {
                                     if (peerMediaElement.current[peerID] && remoteStream.addTrack.length === 1) {
-                                        console.log('234')
                                         peerMediaElement.current[peerID].srcObject = remoteStream;
                                         settled = true;
                                         resolve()
@@ -145,7 +142,10 @@ export default function useWebRTC(roomID) {
             delete peerMediaElement.current[peerID];
 
             updateClients(list => list.filter(c => c !== peerID));
+            console.log('back')
         };
+
+
 
         socket.on(ACTIONS.REMOVE_PEER, handleRemovePeer);
 
@@ -182,13 +182,13 @@ export default function useWebRTC(roomID) {
         }
 
 
-        const startCaptureDone = startCapture()
 
-        socket.on(ACTIONS.WEBRTC_ON, () => {
-            startCaptureDone
-               .then(() => socket.emit(ACTIONS.JOIN, {room: roomID}))
-               .catch(e => console.error('Error getting userMedia', e))
-       })
+
+
+        startCapture()
+           .then(() => socket.emit(ACTIONS.JOIN, {room: roomID}))
+           .catch(e => console.error('Error getting userMedia', e))
+
 
         return () => {
             localMediaStream.current.getTracks().forEach(track => track.stop())

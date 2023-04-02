@@ -8,13 +8,11 @@ const ACTIONS = {
     RELAY_ICE: 'relay-ice',
     ICE_CANDIDATE: 'ice-candidate',
     SESSION_DESCRIPTION: 'session-description',
-    HOST_ROOM: 'host-room',
-    JOIN_ROOM: 'join-room',
-    CALL_HOST: 'call-host',
-    MEMBER_CONNECT: 'member_connect',
-    MEMBER_PASS: 'member_pass',
-    MEMBER_PASS_DONE: 'member_pass_done',
-    WEBRTC_ON: 'webrtc-on'
+    ADD_MEMBER: 'add-member',
+    SHARE_ROOM_MEMBERS: 'share-room-members',
+    HOST_REMOVE_MEMBER: 'host-remove-member',
+    MEMBER_FORCED_DISCONNECTING: 'member-forced-disconnecting'
+
 };
 
 module.exports = ACTIONS;

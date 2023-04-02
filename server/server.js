@@ -18,7 +18,7 @@ const io = require('socket.io')(server, {
 const ACTIONS = require('./src/actions')
 const {validate, version} = require("uuid");
 const PORT = process.env.PORT || 3001
-const roomsHost = new Map()
+const roomsMembers = {}
 
 
 
@@ -31,59 +31,62 @@ function getClientRoom(){
 function shareRoomsInfo(){
     io.emit(ACTIONS.SHARE_ROOMS, {rooms: getClientRoom()})
 }
-
+//присоединение к комнате(начало)
 io.on('connection', socket => {
     shareRoomsInfo()
 
-    socket.on(ACTIONS.HOST_ROOM, ({roomIDHost, hostID}) => {
-        roomsHost.set(roomIDHost, hostID)
-        console.log(roomsHost)
-    })
-
-    socket.on(ACTIONS.CALL_HOST, ({roomIDMember, memberID}) => {
-        for (let roomIDHost of roomsHost.keys()) {
-            if (roomIDHost === roomIDMember) {
-                io.to(roomsHost.get(roomIDHost)).emit(ACTIONS.MEMBER_CONNECT, {memberID})
-            }
+    socket.on(ACTIONS.ADD_MEMBER, ({roomIDMember, memberID, host}) => {
+        if (!roomsMembers[roomIDMember] && host) {
+            roomsMembers[roomIDMember] = []
+            roomsMembers[roomIDMember].push({memberID, host})
+        } else {
+            roomsMembers[roomIDMember].push({memberID, host})
         }
-    })
 
-    socket.on(ACTIONS.MEMBER_PASS, ({memberID}) => {
-        io.to(memberID).emit(ACTIONS.JOIN_ROOM)
-    })
+        const client = Array.from(io.sockets.adapter.rooms.get(roomIDMember) || [])
 
+        client.forEach(clientID => {
 
-    socket.on(ACTIONS.MEMBER_PASS_DONE, ({id}) => {
-    //присоединение к комнате(начало)
-        io.to(id).emit(ACTIONS.WEBRTC_ON)
-
-        socket.on(ACTIONS.JOIN, config => {
-            const {room: roomID} = config
-            const {rooms: joinedRoms} = socket
-
-            if (Array.from(joinedRoms).includes(roomID)) {
-                return console.warn(`Already joined to ${roomID}`)
-            }
-
-            const client = Array.from(io.sockets.adapter.rooms.get(roomID) || [])
-
-            client.forEach(clientID => {
-                io.to(clientID).emit(ACTIONS.ADD_PEER, {
-                    peerID: socket.id,
-                    createOffer: false
-                })
-
-                socket.emit(ACTIONS.ADD_PEER, {
-                    peerID: clientID,
-                    createOffer: true
-                })
+            io.to(clientID).emit(ACTIONS.SHARE_ROOM_MEMBERS, {
+                roomMembersList: roomsMembers[roomIDMember]
             })
 
-            socket.join(roomID)
-            shareRoomsInfo()
+            socket.emit(ACTIONS.SHARE_ROOM_MEMBERS, {
+                roomMembersList: roomsMembers[roomIDMember]
+            })
         })
-    //присоединение к комнате(конец)
     })
+
+
+    socket.on(ACTIONS.JOIN, config => {
+        const {room: roomID} = config
+        const {rooms: joinedRoms} = socket
+
+        if (Array.from(joinedRoms).includes(roomID)) {
+            return console.warn(`Already joined to ${roomID}`)
+        }
+
+        const client = Array.from(io.sockets.adapter.rooms.get(roomID) || [])
+
+        client.forEach(clientID => {
+            io.to(clientID).emit(ACTIONS.ADD_PEER, {
+                peerID: socket.id,
+                createOffer: false
+            })
+
+            socket.emit(ACTIONS.ADD_PEER, {
+                peerID: clientID,
+                createOffer: true
+            })
+        })
+
+        socket.join(roomID)
+
+        shareRoomsInfo()
+    })
+    //присоединение к комнате(конец)
+
+
 
     //отсоединение от комнаты(начало)
     function leaveRoom() {
@@ -107,8 +110,13 @@ io.on('connection', socket => {
         shareRoomsInfo()
     }
 
+    socket.on(ACTIONS.HOST_REMOVE_MEMBER, ({memberIDRemove}) => {
+        io.to(memberIDRemove).emit(ACTIONS.MEMBER_FORCED_DISCONNECTING)
+    })
+
     socket.on(ACTIONS.LEAVE, leaveRoom)
     socket.on('disconnecting', leaveRoom)
+
     //отсоединение от комнаты(конец)
 
     socket.on(ACTIONS.RELAY_SDP, ({peerID, sessionDescription}) => {
