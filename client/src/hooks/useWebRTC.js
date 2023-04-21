@@ -138,11 +138,12 @@ export default function useWebRTC(roomID) {
                 peerConnections.current[peerID].close();
             }
 
+
             delete peerConnections.current[peerID];
             delete peerMediaElement.current[peerID];
 
+
             updateClients(list => list.filter(c => c !== peerID));
-            console.log('back')
         };
 
 
@@ -153,6 +154,7 @@ export default function useWebRTC(roomID) {
             socket.off(ACTIONS.REMOVE_PEER);
         }
     }, []);
+
 
 
     useEffect(() => {
@@ -192,6 +194,7 @@ export default function useWebRTC(roomID) {
 
         return () => {
             localMediaStream.current.getTracks().forEach(track => track.stop())
+
             socket.emit(ACTIONS.LEAVE)
         }
 

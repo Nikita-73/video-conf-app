@@ -5,8 +5,8 @@ const fs = require('fs');
 const cors = require('cors')
 
 const server = require('https').createServer({
-    key: fs.readFileSync('./.cert/key.pem'),
-    cert: fs.readFileSync('./.cert/cert.pem')
+    key: fs.readFileSync(path.resolve('.cert/key.pem')),
+    cert: fs.readFileSync(path.resolve('.cert/cert.pem'))
 }, app)
 
 const io = require('socket.io')(server, {
@@ -35,25 +35,20 @@ function shareRoomsInfo(){
 io.on('connection', socket => {
     shareRoomsInfo()
 
-    socket.on(ACTIONS.ADD_MEMBER, ({roomIDMember, memberID, host}) => {
+    socket.on(ACTIONS.ADD_MEMBER, ({roomIDMember, memberID, host, name, surname}) => {
         if (!roomsMembers[roomIDMember] && host) {
             roomsMembers[roomIDMember] = []
-            roomsMembers[roomIDMember].push({memberID, host})
+            roomsMembers[roomIDMember].push({memberID, host, name, surname})
         } else {
-            roomsMembers[roomIDMember].push({memberID, host})
+            roomsMembers[roomIDMember].push({memberID, host, name, surname})
         }
 
-        const client = Array.from(io.sockets.adapter.rooms.get(roomIDMember) || [])
 
-        client.forEach(clientID => {
-
-            io.to(clientID).emit(ACTIONS.SHARE_ROOM_MEMBERS, {
+        roomsMembers[roomIDMember].forEach(clients => {
+            io.to(clients.memberID).emit(ACTIONS.SHARE_ROOM_MEMBERS, {
                 roomMembersList: roomsMembers[roomIDMember]
             })
 
-            socket.emit(ACTIONS.SHARE_ROOM_MEMBERS, {
-                roomMembersList: roomsMembers[roomIDMember]
-            })
         })
     })
 
@@ -66,9 +61,9 @@ io.on('connection', socket => {
             return console.warn(`Already joined to ${roomID}`)
         }
 
-        const client = Array.from(io.sockets.adapter.rooms.get(roomID) || [])
+        const clients = Array.from(io.sockets.adapter.rooms.get(roomID) || [])
 
-        client.forEach(clientID => {
+        clients.forEach(clientID => {
             io.to(clientID).emit(ACTIONS.ADD_PEER, {
                 peerID: socket.id,
                 createOffer: false
@@ -79,6 +74,7 @@ io.on('connection', socket => {
                 createOffer: true
             })
         })
+
 
         socket.join(roomID)
 
@@ -91,17 +87,32 @@ io.on('connection', socket => {
     //отсоединение от комнаты(начало)
     function leaveRoom() {
         const {rooms} = socket
+        const memberIDRoom = [...rooms]
+
+        try {
+            const memberDelete = roomsMembers[memberIDRoom[1]].findIndex(item => item.memberID === socket.id)
+            if (memberDelete >= 0)
+                roomsMembers[memberIDRoom[1]].splice(memberDelete, 1)
+            roomsMembers[memberIDRoom[1]].forEach(clients => {
+                io.to(clients.memberID).emit(ACTIONS.SHARE_ROOM_MEMBERS, {
+                    roomMembersList: roomsMembers[memberIDRoom[1]]
+                })
+            })
+        } catch(e) {
+            //console.log('error index')
+        }
+
 
         Array.from(rooms).
         forEach(roomID => {
-            const client = Array.from(io.sockets.adapter.rooms.get(roomID) || [])
+            const clients = Array.from(io.sockets.adapter.rooms.get(roomID) || [])
 
-            client.forEach(clientID => {
+            clients.forEach(clientID => {
                 io.to(clientID).emit(ACTIONS.REMOVE_PEER, {
                     peerID: socket.id
                 })
 
-                socket.emit(ACTIONS.REMOVE_PEER, {
+            socket.emit(ACTIONS.REMOVE_PEER, {
                     peerID: clientID
                 })
             })
@@ -110,9 +121,24 @@ io.on('connection', socket => {
         shareRoomsInfo()
     }
 
-    socket.on(ACTIONS.HOST_REMOVE_MEMBER, ({memberIDRemove}) => {
-        io.to(memberIDRemove).emit(ACTIONS.MEMBER_FORCED_DISCONNECTING)
+    socket.on(ACTIONS.REMOVE_MEMBER, ({membersList, memberIDRemove}) => {
+        membersList.forEach(clients => {
+            io.to(clients.memberID).emit(ACTIONS.MEMBER_FORCED_DISCONNECTING, {memberIDRemove})
+        })
     })
+
+    socket.on(ACTIONS.MEMBER_CLEAN_LIST, ({memberIDRoom, memberID}) => {
+        const memberDelete = roomsMembers[memberIDRoom].findIndex(item => item.memberID === memberID)
+        if (memberDelete >= 0)
+            roomsMembers[memberIDRoom].splice(memberDelete, 1)
+
+        roomsMembers[memberIDRoom].forEach(clients => {
+            io.to(clients.memberID).emit(ACTIONS.SHARE_ROOM_MEMBERS, {
+                roomMembersList: roomsMembers[memberIDRoom]
+            })
+        })
+    })
+
 
     socket.on(ACTIONS.LEAVE, leaveRoom)
     socket.on('disconnecting', leaveRoom)
@@ -140,7 +166,7 @@ io.on('connection', socket => {
 
 
 io.on('connection', socket => {
-    console.log('socket onnnnnn')
+    //console.log('socket onnnnnn')
 })
 
 /*app.use(express.static(path.join(__dirname, '../client', 'build')));
@@ -150,5 +176,7 @@ app.get('/', function (req, res) {
 });
 */
 server.listen(PORT, () => {
-    console.log('server started')
+    //console.log('server started')
 })
+
+

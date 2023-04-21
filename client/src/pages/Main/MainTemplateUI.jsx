@@ -5,16 +5,24 @@ import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
+import socket from "../../socket";
 import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
+import stateMembersRoom from '../../store/stateMembersRoom'
 
 
 
 
-const SignInSide = ({joiningRoom, createNewRoom}) => {
+const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
 
-    const [InputRoom, SetInputRoom] = useState('')
+    const [inputRoom, setInputRoom] = useState('')
+    const [inputName, setInputName] = useState('')
+    const [inputSurname, setInputSurname] = useState('')
+
+
+
+
 
     return (
         <Grid container component="main" sx={{ height: '100vh' }}>
@@ -59,6 +67,8 @@ const SignInSide = ({joiningRoom, createNewRoom}) => {
                             id="firstName"
                             label="First Name"
                             autoFocus
+                            value={inputName}
+                            onChange={e => setInputName(e.target.value)}
                         />
                         <TextField
                             margin="normal"
@@ -68,6 +78,8 @@ const SignInSide = ({joiningRoom, createNewRoom}) => {
                             label="Last Name"
                             name="lastName"
                             autoComplete="family-name"
+                            value={inputSurname}
+                            onChange={e => setInputSurname(e.target.value)}
                         />
                         <TextField
                             margin="normal"
@@ -76,27 +88,42 @@ const SignInSide = ({joiningRoom, createNewRoom}) => {
                             id="roomId"
                             label="Room ID"
                             name="roomId"
-                            value={InputRoom}
-                            onChange={e => SetInputRoom(e.target.value)}
+                            value={inputRoom}
+                            onChange={e => setInputRoom(e.target.value)}
                         />
                         <Button
-                            type="submit"
                             fullWidth
                             variant="contained"
-                            onClick={() => {joiningRoom(InputRoom)}}
+                            onClick={() => {joiningRoom(inputRoom, inputName, inputSurname)}}
                             sx={{ mt: 3, mb: 2 }}
                         >
                             Connect
                         </Button>
                         <Button
-                            type="submit"
                             fullWidth
                             variant="contained"
-                            onClick={createNewRoom}
+                            onClick={() => {createNewRoom(inputName, inputSurname)}}
                             sx={{ mt: 3, mb: 2 }}
                         >
                             Create new room
                         </Button>
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            onClick={() => {stateMembersRoom.setVideoSwitch()}}
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            Video
+                        </Button>
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            onClick={() => {stateMembersRoom.setMicrophoneSwitch()}}
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            Audio
+                        </Button>
+
                     </Box>
                 </Box>
             </Grid>
@@ -104,4 +131,4 @@ const SignInSide = ({joiningRoom, createNewRoom}) => {
     );
 }
 
-export default SignInSide;
+export default MainTemplateUI;

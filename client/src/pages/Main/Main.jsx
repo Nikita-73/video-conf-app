@@ -20,40 +20,35 @@ const Main = () => {
     }, [])
 
 
-    const createNewRoom = function(){
+    const createNewRoom = function(name, surname){
         const roomID = v4()
         history.push(`/room/${roomID}`)
         setTimeout( () => {
             socket.emit(ACTIONS.ADD_MEMBER, {
                 roomIDMember: roomID,
                 memberID: socket.id,
-                host: true
+                host: true,
+                name,
+                surname
 
             })
         }, 2000) // таймаут для прогрузки страницы комнаты(добавления комнаты на сервере)
     }
 
-    const joiningRoom = function(roomID){
+    const joiningRoom = function(roomID, name, surname){
         history.push(`/room/${roomID}`)
         socket.emit(ACTIONS.ADD_MEMBER, {
             roomIDMember: roomID,
             memberID: socket.id,
-            host: false
+            host: false,
+            name,
+            surname
         })
     }
 
     return (
         <div>
-            <h1>Available Rooms</h1>
-            <ul>
-                {rooms.map(roomID => (
-                    <li key={roomID}>
-                        {roomID}
-                        <button onClick={() => {joiningRoom(roomID)}}>JOIN ROOM</button>
-                    </li>
-                ))}
-            </ul>
-            <button onClick={createNewRoom}>Create new room</button>
+            <MainTemplateUI joiningRoom={joiningRoom} createNewRoom={createNewRoom}/>
         </div>
     );
 };
@@ -74,5 +69,7 @@ export default Main;
             <div>
             <MainTemplateUI joiningRoom={joiningRoom} createNewRoom={createNewRoom}/>
         </div>
+
+
 
             */

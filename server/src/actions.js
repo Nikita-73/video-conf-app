@@ -10,8 +10,10 @@ const ACTIONS = {
     SESSION_DESCRIPTION: 'session-description',
     ADD_MEMBER: 'add-member',
     SHARE_ROOM_MEMBERS: 'share-room-members',
-    HOST_REMOVE_MEMBER: 'host-remove-member',
-    MEMBER_FORCED_DISCONNECTING: 'member-forced-disconnecting'
+    REMOVE_MEMBER: 'remove-member',
+    DISCONNECTING_MEMBER: 'disconnecting-member',
+    MEMBER_FORCED_DISCONNECTING: 'member-forced-disconnecting',
+    MEMBER_CLEAN_LIST: 'member-clean-list'
 };
 
 module.exports = ACTIONS;
