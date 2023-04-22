@@ -7,6 +7,7 @@ export const LOCAL_VIDEO = 'LOCAL_VIDEO'
 
 export default function useWebRTC(roomID) {
     const [clients, setStateClients] = useState([])
+    const [stateVideoElements, setStateVideoElements] = useState([])
 
     const addNewClient = useCallback((newClient, cb) => {
         if (!clients.includes(newClient)) {
@@ -50,19 +51,6 @@ export default function useWebRTC(roomID) {
                     addNewClient(peerID, () => {
                         if (peerMediaElement.current[peerID]) {
                             peerMediaElement.current[peerID].srcObject = remoteStream;
-                        } else {
-                            // FIX LONG RENDER IN CASE OF MANY CLIENTS
-                            let settled = false;
-                            const interval = setInterval(() => {
-                                if (peerMediaElement.current[peerID]) {
-                                    peerMediaElement.current[peerID].srcObject = remoteStream;
-                                    settled = true;
-                                }
-
-                                if (settled) {
-                                    clearInterval(interval);
-                                }
-                            }, 1000);
                         }
                     })
                 }
@@ -182,18 +170,6 @@ export default function useWebRTC(roomID) {
                 if (localVideoElement) {
                     localVideoElement.volume = 0
                     localVideoElement.srcObject = localMediaStream.current
-                } else {
-                    let settled = false;
-                    const interval = setInterval(() => {
-                        if (localVideoElement) {
-                            localVideoElement.srcObject = localMediaStream.current
-                            settled = true;
-                        }
-
-                        if (settled) {
-                            clearInterval(interval);
-                        }
-                    }, 1000);
                 }
             })
         }
