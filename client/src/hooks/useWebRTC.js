@@ -7,21 +7,19 @@ export const LOCAL_VIDEO = 'LOCAL_VIDEO'
 
 export default function useWebRTC(roomID) {
     const [clients, setStateClients] = useState([])
-    const [stateVideoElements, setStateVideoElements] = useState([])
-
-    const addNewClient = useCallback((newClient, cb) => {
-        if (!clients.includes(newClient)) {
-            setStateClients(prev => [...prev, newClient])
-            setTimeout(() => {cb()}, 1000)
-        }
-
-    }, [clients])
-
     const peerConnections = useRef({})
     const localMediaStream = useRef(null)
     const peerMediaElement = useRef({
         [LOCAL_VIDEO]: null
     })
+
+    const addNewClient = useCallback((newClient, cb) => {
+        if (!clients.includes(newClient)) {
+            setStateClients(prev => [...prev, newClient])
+            setTimeout(() => cb(), 1000)
+        }
+
+    }, [clients])
 
 
     useEffect(() => {
