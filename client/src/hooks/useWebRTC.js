@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useRef} from "react";
-import useStateWithCallback from "./useStateWithCallback";
+import {useCallback, useEffect, useRef, useState} from "react";
 import socket from "../socket/index";
 import ACTIONS from '../socket/actions'
 import freeice from 'freeice'
@@ -7,13 +6,15 @@ import freeice from 'freeice'
 export const LOCAL_VIDEO = 'LOCAL_VIDEO'
 
 export default function useWebRTC(roomID) {
-    const [clients, updateClients] = useStateWithCallback([])
+    const [clients, setStateClients] = useState([])
 
     const addNewClient = useCallback((newClient, cb) => {
         if (!clients.includes(newClient)) {
-            updateClients(list => [...list, newClient], cb)
+            setStateClients(prev => [...prev, newClient])
+            setTimeout(() => {cb()}, 1000)
         }
-    }, [clients, updateClients])
+
+    }, [clients])
 
     const peerConnections = useRef({})
     const localMediaStream = useRef(null)
@@ -46,21 +47,23 @@ export default function useWebRTC(roomID) {
                     tracksNumber = 0
 
 
-                    addNewClient(peerID, async () => {
-                            // fix long render in case of many clients
-                            await new Promise((resolve) => {
-                                let settled = false;
-                                const interval = setInterval(() => {
-                                    if (peerMediaElement.current[peerID] && remoteStream.addTrack.length === 1) {
-                                        peerMediaElement.current[peerID].srcObject = remoteStream;
-                                        settled = true;
-                                        resolve()
-                                    }
-                                    if (settled) {
-                                        clearInterval(interval);
-                                    }
-                                }, 1000);
-                            })
+                    addNewClient(peerID, () => {
+                        if (peerMediaElement.current[peerID]) {
+                            peerMediaElement.current[peerID].srcObject = remoteStream;
+                        } else {
+                            // FIX LONG RENDER IN CASE OF MANY CLIENTS
+                            let settled = false;
+                            const interval = setInterval(() => {
+                                if (peerMediaElement.current[peerID]) {
+                                    peerMediaElement.current[peerID].srcObject = remoteStream;
+                                    settled = true;
+                                }
+
+                                if (settled) {
+                                    clearInterval(interval);
+                                }
+                            }, 1000);
+                        }
                     })
                 }
             }
@@ -143,7 +146,7 @@ export default function useWebRTC(roomID) {
             delete peerMediaElement.current[peerID];
 
 
-            updateClients(list => list.filter(c => c !== peerID));
+            setStateClients(list => list.filter(c => c !== peerID));
         };
 
 
@@ -179,6 +182,18 @@ export default function useWebRTC(roomID) {
                 if (localVideoElement) {
                     localVideoElement.volume = 0
                     localVideoElement.srcObject = localMediaStream.current
+                } else {
+                    let settled = false;
+                    const interval = setInterval(() => {
+                        if (localVideoElement) {
+                            localVideoElement.srcObject = localMediaStream.current
+                            settled = true;
+                        }
+
+                        if (settled) {
+                            clearInterval(interval);
+                        }
+                    }, 1000);
                 }
             })
         }
