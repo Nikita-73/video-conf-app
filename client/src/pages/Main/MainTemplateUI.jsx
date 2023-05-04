@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -20,8 +20,6 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
     const [stateMicrophone, setStateMicrophone] = useState(true)
     const [stateVideo, setStateVideo] = useState(true)
 
-    console.log(stateVideo)
-
     const colorMicrophoneButton = {
         color: stateMicrophone ? 'success' : 'error'
     }
@@ -30,16 +28,13 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
         color: stateVideo ? 'success' : 'error'
     }
 
-    const enableMicrophone = () => {
-        setStateMicrophone(prev => !prev)
+    useEffect(() => {
         stateMembersRoom.setMicrophoneSwitch(stateMicrophone)
-    }
+    }, [stateMicrophone])
 
-    const enableVideo = () => {
-        setStateVideo(prev => !prev)
-        console.log(' lkj  ', stateVideo)
+    useEffect(() => {
         stateMembersRoom.setVideoSwitch(stateVideo)
-    }
+    }, [stateVideo])
 
 
     return (
@@ -130,7 +125,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                                 variant="contained"
                                 color={colorMicrophoneButton.color}
                                 sx={{ mt: 3, mb: 2, marginRight: '10px' }}
-                                onClick={() => {enableMicrophone()}}
+                                onClick={() => {setStateMicrophone(prev => !prev)}}
                             >
                                 Audio
                             </Button>
@@ -139,7 +134,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                                 variant="contained"
                                 color={colorVideoButton.color}
                                 sx={{ mt: 3, mb: 2 }}
-                                onClick={() => {enableVideo()}}
+                                onClick={() => {setStateVideo(prev => !prev)}}
                             >
                                 Video
                             </Button>

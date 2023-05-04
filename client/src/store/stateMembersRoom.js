@@ -15,14 +15,14 @@ class stateMembersRoom {
         this.listMembers = list
     }
 
-    setVideoSwitch(state) {
-        this.videoState = state
-        console.log(this.videoState)
-    }
-
     setMicrophoneSwitch(state) {
         this.microphoneState = state
         console.log(this.microphoneState)
+    }
+
+    setVideoSwitch(state) {
+        this.videoState = state
+        console.log(this.videoState)
     }
 
 
