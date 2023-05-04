@@ -19,8 +19,8 @@ const Room = observer(() => {    // observer можно убрать так ка
     const {id: roomID} = useParams();
     const {clients, provideMediaRef, microphoneLocal, videoLocal, captureScreenLocal} = useWebRTC(roomID);
 
-    const [stateMic, setStateMic] = useState(true)
-    const [stateVideo, setStateVideo] = useState(true)
+    const [stateMic, setStateMic] = useState(stateMembersRoom.microphoneState)
+    const [stateVideo, setStateVideo] = useState(stateMembersRoom.videoState)
     const [stateCapture, setStateCapture] = useState(true)
     const [stateDrawer, setStateDrawer] = useState(false)
     const [stateChangeView, setStateChangeView] = useState(6)
@@ -49,16 +49,6 @@ const Room = observer(() => {    // observer можно убрать так ка
         alert('Приглашение скопировано')
     }
 
-    useEffect(() => {
-        setTimeout (() => {
-            if (stateMembersRoom.videoState === false) {
-                videoChange()
-            }
-            if (stateMembersRoom.microphoneState === false) {
-                microphoneChange()
-            }
-        }, 1200)// webrtc может не успеть отработать
-    }, [])
 
     const changeView = () => {
         setStateChangeView(prev => prev === 6 ? 12 : 6)

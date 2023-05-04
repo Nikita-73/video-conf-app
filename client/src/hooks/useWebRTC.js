@@ -2,6 +2,7 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import socket from "../socket/index";
 import ACTIONS from '../socket/actions'
 import freeice from 'freeice'
+import stateMembersRoom from '../../src/store/stateMembersRoom'
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO'
 
@@ -57,6 +58,7 @@ export default function useWebRTC(roomID) {
             localMediaStream.current.getTracks().forEach(track => {
                 peerConnections.current[peerID].addTrack(track, localMediaStream.current)
             })
+
 
             if (createOffer) {
                 const offer = await peerConnections.current[peerID].createOffer()
@@ -170,6 +172,14 @@ export default function useWebRTC(roomID) {
                     localVideoElement.srcObject = localMediaStream.current
                 }
             })
+
+            const [audioTrack] = localMediaStream.current.getAudioTracks()
+            if (audioTrack && stateMembersRoom.microphoneState === false)
+                audioTrack.enabled = false
+
+            const [videoTrack] = localMediaStream.current.getVideoTracks()
+            if (videoTrack && stateMembersRoom.videoState === false)
+                videoTrack.enabled = false
         }
 
 
