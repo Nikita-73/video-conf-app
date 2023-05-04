@@ -17,12 +17,10 @@ class stateMembersRoom {
 
     setMicrophoneSwitch(state) {
         this.microphoneState = state
-        console.log(this.microphoneState)
     }
 
     setVideoSwitch(state) {
         this.videoState = state
-        console.log(this.videoState)
     }
 
 
