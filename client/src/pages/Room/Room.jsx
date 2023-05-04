@@ -3,13 +3,14 @@ import {useParams, useHistor} from "react-router";
 import useWebRTC, {LOCAL_VIDEO} from "../../hooks/useWebRTC";
 import socket from "../../socket";
 import {observer} from 'mobx-react-lite'
+import stateMembersRoom from '../../store/stateMembersRoom'
 import {Grid, Button, Box, AppBar, Toolbar, Typography, ButtonGroup, Drawer} from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import DrawerMemberUI from './DrawerMemberUI'
 import PersonIcon from '@mui/icons-material/Person';
 import WindowIcon from '@mui/icons-material/Window';
 import CopyAllIcon from '@mui/icons-material/CopyAll';
-import stateMembersRoom from '../../store/stateMembersRoom'
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 
@@ -24,6 +25,7 @@ const Room = observer(() => {    // observer можно убрать так ка
     const [stateCapture, setStateCapture] = useState(true)
     const [stateDrawer, setStateDrawer] = useState(false)
     const [stateChangeView, setStateChangeView] = useState(6)
+    const [statePreloaderCircle, setStatePreloaderCircle] = useState('block')
 
     const microphoneChange = function() {
         microphoneLocal(stateMic)
@@ -64,6 +66,54 @@ const Room = observer(() => {    // observer можно убрать так ка
         })
     }
 
+    const displayStreams = () => {
+        return clients.map((clientID) => {
+            return (
+                <Grid item xs={12} md={stateChangeView} key={clientID} id={clientID}>
+                    <video
+                        width='100%'
+                        height='100%'
+                        ref={instance => {
+                            provideMediaRef(clientID, instance);
+                        }}
+                        autoPlay
+                        playsInline
+                        muted={clientID === LOCAL_VIDEO}
+                    />
+                    {tegName(clientID)}
+                </Grid>
+            );
+        })
+    }
+
+    useEffect(() => {
+        setTimeout(() => setStatePreloaderCircle('none'), 2000)
+    }, [])
+
+
+    const showPreloaderCircle = () => {
+        return (<Box sx={{
+            display: `${statePreloaderCircle}`,
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            marginTop: '10px',
+            backgroundColor: 'white',
+            zIndex: '1',
+        }}>
+            <Box sx={{
+                position: 'absolute',
+                left: '50%',
+                top: '45%',
+                transform: 'translate(-50%, -50%)'
+            }}>
+                <CircularProgress />
+            </Box>
+        </Box>)
+    }
+
+
+
 
     return (
         <>
@@ -98,29 +148,14 @@ const Room = observer(() => {    // observer можно убрать так ка
 
 
                 <Box sx={{
-                    width: '80%',
+                    maxWidth: '80%',
                     height: '100%',
-                    margin: 'auto'
-
+                    margin: 'auto',
+                    position: 'relative'
                 }}>
-                    <Grid container spacing={2} sx={{marginTop: '2px'}}>
-                        {clients.map((clientID) => {
-                            return (
-                                <Grid item xs={12} md={stateChangeView} key={clientID} id={clientID} >
-                                    <video
-                                        width='100%'
-                                        height='100%'
-                                        ref={instance => {
-                                            provideMediaRef(clientID, instance);
-                                        }}
-                                        autoPlay
-                                        playsInline
-                                        muted={clientID === LOCAL_VIDEO}
-                                    />
-                                    {tegName(clientID)}
-                                </Grid>
-                            );
-                        })}
+                    {showPreloaderCircle()}
+                    <Grid container spacing={2} sx={{position: 'absolute', marginTop: '2px'}}>
+                        {displayStreams()}
                     </Grid>
                 </Box>
             </Box>
