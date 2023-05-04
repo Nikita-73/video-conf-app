@@ -39,6 +39,7 @@ const DrawerMemberUi = ({cartOpen, closeCart}) => {
                 memberIDRoom: roomID,
                 memberID: memberIDRemove
             })
+            alert('Вы были отключены')
         }
 
         setStateMembersList(prev => prev.filter(item => item.memberID !== memberIDRemove))

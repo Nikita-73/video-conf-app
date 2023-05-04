@@ -236,7 +236,6 @@ export default function useWebRTC(roomID) {
                 const [videoTrack] = localMediaStream.current.getVideoTracks()
                 peerMediaElement.current['LOCAL_VIDEO'].srcObject = localMediaStream.current;
                 for (const pc in peerConnections.current) {
-                    console.log(peerConnections.current[pc])
                     const sender = peerConnections.current[pc]
                         .getSenders()
                         .find((s) => s.track.kind === videoTrack.kind);

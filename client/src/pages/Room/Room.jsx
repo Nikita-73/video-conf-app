@@ -57,7 +57,7 @@ const Room = observer(() => {    // observer можно убрать так ка
             if (stateMembersRoom.microphoneState === false) {
                 microphoneChange()
             }
-        }, 1000)// webrtc может не успеть отработать
+        }, 1200)// webrtc может не успеть отработать
     }, [])
 
     const changeView = () => {

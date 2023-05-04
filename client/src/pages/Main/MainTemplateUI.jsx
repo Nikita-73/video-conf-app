@@ -12,16 +12,34 @@ import Typography from '@mui/material/Typography';
 import stateMembersRoom from '../../store/stateMembersRoom'
 
 
-
-
 const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
 
     const [inputRoom, setInputRoom] = useState('')
     const [inputName, setInputName] = useState('')
     const [inputSurname, setInputSurname] = useState('')
+    const [stateMicrophone, setStateMicrophone] = useState(true)
+    const [stateVideo, setStateVideo] = useState(true)
 
+    console.log(stateVideo)
 
+    const colorMicrophoneButton = {
+        color: stateMicrophone ? 'success' : 'error'
+    }
 
+    const colorVideoButton = {
+        color: stateVideo ? 'success' : 'error'
+    }
+
+    const enableMicrophone = () => {
+        setStateMicrophone(prev => !prev)
+        stateMembersRoom.setMicrophoneSwitch(stateMicrophone)
+    }
+
+    const enableVideo = () => {
+        setStateVideo(prev => !prev)
+        console.log(' lkj  ', stateVideo)
+        stateMembersRoom.setVideoSwitch(stateVideo)
+    }
 
 
     return (
@@ -62,7 +80,6 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                             margin="normal"
                             autoComplete="given-name"
                             name="firstName"
-                            required
                             fullWidth
                             id="firstName"
                             label="First Name"
@@ -72,7 +89,6 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                         />
                         <TextField
                             margin="normal"
-                            required
                             fullWidth
                             id="lastName"
                             label="Last Name"
@@ -83,7 +99,6 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                         />
                         <TextField
                             margin="normal"
-                            required
                             fullWidth
                             id="roomId"
                             label="Room ID"
@@ -94,36 +109,41 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                         <Button
                             fullWidth
                             variant="contained"
-                            onClick={() => {joiningRoom(inputRoom, inputName, inputSurname)}}
                             sx={{ mt: 3, mb: 2 }}
+                            onClick={() => {joiningRoom(inputRoom, inputName, inputSurname)}}
                         >
                             Connect
                         </Button>
                         <Button
                             fullWidth
                             variant="contained"
-                            onClick={() => {createNewRoom(inputName, inputSurname)}}
                             sx={{ mt: 3, mb: 2 }}
+                            onClick={() => {createNewRoom(inputName, inputSurname)}}
                         >
                             Create new room
                         </Button>
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            onClick={() => {stateMembersRoom.setVideoSwitch()}}
-                            sx={{ mt: 3, mb: 2 }}
+                        <Box
+                        sx={{display: 'flex', justifyContent: 'space-between'}}
                         >
-                            Video
-                        </Button>
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            onClick={() => {stateMembersRoom.setMicrophoneSwitch()}}
-                            sx={{ mt: 3, mb: 2 }}
-                        >
-                            Audio
-                        </Button>
-
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color={colorMicrophoneButton.color}
+                                sx={{ mt: 3, mb: 2, marginRight: '10px' }}
+                                onClick={() => {enableMicrophone()}}
+                            >
+                                Audio
+                            </Button>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color={colorVideoButton.color}
+                                sx={{ mt: 3, mb: 2 }}
+                                onClick={() => {enableVideo()}}
+                            >
+                                Video
+                            </Button>
+                        </Box>
                     </Box>
                 </Box>
             </Grid>
