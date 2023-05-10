@@ -34,6 +34,7 @@ const Room = observer(() => {    // observer можно убрать так ка
         setStateMic(prev => !prev)
     }
 
+
     const videoChange = function() {
         videoLocal(stateVideo)
         setStateVideo(prev => !prev)
@@ -48,7 +49,11 @@ const Room = observer(() => {    // observer можно убрать так ка
         document.location.href = 'https://localhost:3000'
     }
 
-
+    useEffect(() => {
+        return () => {
+            document.location.href = 'https://localhost:3000'
+        }
+    }, [])
 
     const copyRoomIdHandle = () => {
         navigator.clipboard.writeText(`${roomID}`)
