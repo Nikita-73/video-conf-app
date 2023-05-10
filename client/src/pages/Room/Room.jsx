@@ -11,6 +11,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import WindowIcon from '@mui/icons-material/Window';
 import CopyAllIcon from '@mui/icons-material/CopyAll';
 import CircularProgress from '@mui/material/CircularProgress';
+import '../Room/styles/RoomBorderVideo.css'
+
 
 
 
@@ -46,6 +48,8 @@ const Room = observer(() => {    // observer можно убрать так ка
         document.location.href = 'https://localhost:3000'
     }
 
+
+
     const copyRoomIdHandle = () => {
         navigator.clipboard.writeText(`${roomID}`)
         alert('Приглашение скопировано')
@@ -54,6 +58,14 @@ const Room = observer(() => {    // observer можно убрать так ка
 
     const changeView = () => {
         setStateChangeView(prev => prev === 6 ? 12 : 6)
+    }
+
+    const changeViewSizeVideo = () => {
+        if (stateChangeView === 6) {
+            return {maxHeight: '380px', maxWidth: '610px'}
+        } else {
+            return {height: '100%', width: '100%'}
+        }
     }
 
     const tegName = (clientID) => {
@@ -69,18 +81,27 @@ const Room = observer(() => {    // observer можно убрать так ка
     const displayStreams = () => {
         return clients.map((clientID) => {
             return (
-                <Grid item xs={12} md={stateChangeView} key={clientID} id={clientID}>
-                    <video
-                        width='100%'
-                        height='100%'
-                        ref={instance => {
-                            provideMediaRef(clientID, instance);
-                        }}
-                        autoPlay
-                        playsInline
-                        muted={clientID === LOCAL_VIDEO}
-                    />
-                    {tegName(clientID)}
+                <Grid item xs={12}
+                      md={stateChangeView}
+                      key={clientID}
+                      sx={changeViewSizeVideo()}
+                >
+                    <Box sx={{MaxHeight: '330px', maxWidth: '600px', position: 'relative'}}
+                         className={'gradient-border'}>
+                        <video
+                            height='100%'
+                            width='100%'
+                            ref={instance => {
+                                provideMediaRef(clientID, instance);
+                            }}
+                            autoPlay
+                            playsInline
+                            muted={clientID === LOCAL_VIDEO}
+                        />
+                        <Box sx={{position: 'absolute', right: '0', bottom:'3px'}}>
+                            {tegName(clientID)}
+                        </Box>
+                    </Box>
                 </Grid>
             );
         })
@@ -89,7 +110,6 @@ const Room = observer(() => {    // observer можно убрать так ка
     useEffect(() => {
         setTimeout(() => setStatePreloaderCircle('none'), 2000)
     }, [])
-
 
     const showPreloaderCircle = () => {
         return (<Box sx={{
@@ -119,7 +139,7 @@ const Room = observer(() => {    // observer можно убрать так ка
         <>
             <Box sx={{
                 height: '100%',
-                position: 'relative'
+                width: '100%',
             }}>
                 <AppBar position='static'>
                         <Toolbar sx={{minHeight: '50px !important', justifyContent: 'space-between'}}>
@@ -127,7 +147,7 @@ const Room = observer(() => {    // observer можно убрать так ка
                                     marginRight={'10px'}
                                     variant="h6"
                                 >
-                                    Video Chat
+                                    Видео Чат
                                 </Typography>
                             <ButtonGroup size="small" aria-label="small button group" variant='text'  sx={{
                                 backgroundColor: 'red',
@@ -144,9 +164,6 @@ const Room = observer(() => {    // observer можно убрать так ка
                             </Box>
                         </Toolbar>
                 </AppBar>
-
-
-
                 <Box sx={{
                     maxWidth: '80%',
                     height: '100%',
@@ -154,7 +171,7 @@ const Room = observer(() => {    // observer можно убрать так ка
                     position: 'relative'
                 }}>
                     {showPreloaderCircle()}
-                    <Grid container spacing={2} sx={{position: 'absolute', marginTop: '2px'}}>
+                    <Grid container spacing={2} sx={{marginTop: '10px', height: '100%', width: '100%'}}>
                         {displayStreams()}
                     </Grid>
                 </Box>

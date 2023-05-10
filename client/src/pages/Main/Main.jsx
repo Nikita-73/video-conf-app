@@ -1,28 +1,15 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React from 'react';
 import socket from "../../socket";
 import ACTIONS from '../../socket/actions';
-import {useHistory} from "react-router";
 import {v4} from 'uuid'
 import MainTemplateUI from '../Main/MainTemplateUI'
 
 const Main = () => {
 
-    const history = useHistory()
-    const [rooms, updateRooms] = useState([])
-    const rootNode = useRef()
-
-    useEffect( () => {
-        socket.on(ACTIONS.SHARE_ROOMS, ({rooms = []} = {}) => {
-            //if (rootNode.current) {
-                updateRooms(rooms)
-            //}
-        })
-    }, [])
-
 
     const createNewRoom = function(name, surname){
         const roomID = v4()
-        history.push(`/room/${roomID}`)
+        document.location.href = `/room/${roomID}`
         setTimeout( () => {
             socket.emit(ACTIONS.ADD_MEMBER, {
                 roomIDMember: roomID,
@@ -36,7 +23,7 @@ const Main = () => {
     }
 
     const joiningRoom = function(roomID, name, surname){
-        history.push(`/room/${roomID}`)
+        document.location.href = `/room/${roomID}`
         socket.emit(ACTIONS.ADD_MEMBER, {
             roomIDMember: roomID,
             memberID: socket.id,
