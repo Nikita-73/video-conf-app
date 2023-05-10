@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {useParams, useHistor} from "react-router";
+import {useParams} from "react-router";
 import useWebRTC, {LOCAL_VIDEO} from "../../hooks/useWebRTC";
 import socket from "../../socket";
 import {observer} from 'mobx-react-lite'
@@ -60,11 +60,27 @@ const Room = observer(() => {    // observer можно убрать так ка
         setStateChangeView(prev => prev === 6 ? 12 : 6)
     }
 
-    const changeViewSizeVideo = () => {
+    const changeViewSizeBoxVideo = () => {
+        if (stateChangeView === 6) {
+            return {maxHeight: '380px', maxWidth: '610px', position: 'relative'}
+        } else {
+            return {height: '100%', width: '100%', position: 'relative'}
+        }
+    }
+
+    const changeViewSizeGridVideo = () => {
         if (stateChangeView === 6) {
             return {maxHeight: '380px', maxWidth: '610px'}
         } else {
             return {height: '100%', width: '100%'}
+        }
+    }
+
+    const changeViewBorderVideo = () => {
+        if (stateChangeView === 6) {
+            return 'gradient-border'
+        } else {
+            return ''
         }
     }
 
@@ -84,10 +100,10 @@ const Room = observer(() => {    // observer можно убрать так ка
                 <Grid item xs={12}
                       md={stateChangeView}
                       key={clientID}
-                      sx={changeViewSizeVideo()}
+                      sx={changeViewSizeGridVideo()}
                 >
-                    <Box sx={{MaxHeight: '330px', maxWidth: '600px', position: 'relative'}}
-                         className={'gradient-border'}>
+                    <Box sx={changeViewSizeBoxVideo()}
+                         className={changeViewBorderVideo()}>
                         <video
                             height='100%'
                             width='100%'

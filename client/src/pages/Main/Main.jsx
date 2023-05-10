@@ -1,15 +1,19 @@
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import socket from "../../socket";
 import ACTIONS from '../../socket/actions';
+import {useHistory} from "react-router";
 import {v4} from 'uuid'
 import MainTemplateUI from '../Main/MainTemplateUI'
 
 const Main = () => {
 
+    const history = useHistory()
+
+
 
     const createNewRoom = function(name, surname){
         const roomID = v4()
-        document.location.href = `/room/${roomID}`
+        history.push(`/room/${roomID}`)
         setTimeout( () => {
             socket.emit(ACTIONS.ADD_MEMBER, {
                 roomIDMember: roomID,
@@ -23,7 +27,7 @@ const Main = () => {
     }
 
     const joiningRoom = function(roomID, name, surname){
-        document.location.href = `/room/${roomID}`
+        history.push(`/room/${roomID}`)
         socket.emit(ACTIONS.ADD_MEMBER, {
             roomIDMember: roomID,
             memberID: socket.id,

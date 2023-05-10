@@ -9,7 +9,6 @@
     margin: 1em auto;
     border: solid var(--b) transparent;
     padding: 1em;
-    max-width: 23em;
     font: 1.25em ubuntu, sans-serif;
 }
 .gradient-border::before {
@@ -28,3 +27,5 @@
     mask: var(--corner) subtract, var(--inner);
     content: "";
 }
+
+
