@@ -18,6 +18,7 @@ import '../Room/styles/RoomBorderVideo.css'
 
 
 
+
 const Room = observer(() => {    // observer можно убрать так как у меня и так много рендеров, но надо глянуть
     const {id: roomID} = useParams();
     const {clients, provideMediaRef, microphoneLocal, videoLocal, captureScreenLocal} = useWebRTC(roomID);
@@ -34,10 +35,17 @@ const Room = observer(() => {    // observer можно убрать так ка
         setStateMic(prev => !prev)
     }
 
+    const colorMicrophoneButton = {
+        color: stateMic ? 'success' : 'error'
+    }
 
     const videoChange = function() {
         videoLocal(stateVideo)
         setStateVideo(prev => !prev)
+    }
+
+    const colorVideoButton = {
+        color: stateVideo ? 'success' : 'error'
     }
 
     const captureChange = function() {
@@ -56,7 +64,7 @@ const Room = observer(() => {    // observer можно убрать так ка
     }, [])
 
     const copyRoomIdHandle = () => {
-        navigator.clipboard.writeText(`${roomID}`)
+        navigator.clipboard.writeText(`Здравствуйте, это преглашение на видеоконференцию \r\n Сайт: https://localhost:3000/ \r\n Идентификатор комнаты:  ${roomID}`)
         alert('Приглашение скопировано')
     }
 
@@ -89,7 +97,16 @@ const Room = observer(() => {    // observer можно убрать так ка
         }
     }
 
-    const tegName = (clientID) => {
+    const changeViewTagNameVideo = () => {
+        if (stateChangeView === 6) {
+            return {position: 'absolute', width: '100%', bottom:'-10px', left: '0',
+                font: 'small-caps bold 24px/1 sans-serif', textAlign: 'center', boxSizing: 'border-box', color: 'white'}
+        } else {
+            return {display: 'none'}
+        }
+    }
+
+    const tagName = (clientID) => {
         return stateMembersRoom.listMembers.map(item => {
             if(clientID === 'LOCAL_VIDEO')
                 if(socket.id === item.memberID)
@@ -108,7 +125,9 @@ const Room = observer(() => {    // observer можно убрать так ка
                       sx={changeViewSizeGridVideo()}
                 >
                     <Box sx={changeViewSizeBoxVideo()}
-                         className={changeViewBorderVideo()}>
+                         className={changeViewBorderVideo()}
+                    >
+
                         <video
                             height='100%'
                             width='100%'
@@ -119,8 +138,8 @@ const Room = observer(() => {    // observer можно убрать так ка
                             playsInline
                             muted={clientID === LOCAL_VIDEO}
                         />
-                        <Box sx={{position: 'absolute', right: '0', bottom:'3px'}}>
-                            {tegName(clientID)}
+                        <Box sx={changeViewTagNameVideo()}>
+                            {tagName(clientID)}
                         </Box>
                     </Box>
                 </Grid>
@@ -139,7 +158,7 @@ const Room = observer(() => {    // observer можно убрать так ка
             width: '100%',
             height: '100%',
             marginTop: '10px',
-            backgroundColor: 'white',
+            backgroundColor: '#1e1e21',
             zIndex: '1',
         }}>
             <Box sx={{
@@ -154,8 +173,6 @@ const Room = observer(() => {    // observer можно убрать так ка
     }
 
 
-
-
     return (
         <>
             <Box sx={{
@@ -167,15 +184,33 @@ const Room = observer(() => {    // observer можно убрать так ка
                                 <Typography
                                     marginRight={'10px'}
                                     variant="h6"
+                                    sx={{font: 'small-caps bold 24px/1 sans-serif'}}
                                 >
-                                    Видео Чат
+                                    ВИДЕО ЧАТ
                                 </Typography>
-                            <ButtonGroup size="small" aria-label="small button group" variant='text'  sx={{
-                                backgroundColor: 'red',
+                            <ButtonGroup size="small" aria-label="small button group" variant="contained"  sx={{
                             }}>
-                                <Button onClick={microphoneChange}>Micro On/Off</Button>
-                                <Button onClick={videoChange}>Video On/Off</Button>
-                                <Button onClick={captureChange}>Capture Screen On/Off</Button>
+                                <Button
+                                    color={colorMicrophoneButton.color}
+                                    sx={{font: 'small-caps bold 17px/1 sans-serif'}}
+                                    onClick={microphoneChange}
+                                >
+                                    Микрофон
+                                </Button>
+                                <Button
+                                    color={colorVideoButton.color}
+                                    sx={{font: 'small-caps bold 17px/1 sans-serif'}}
+                                    onClick={videoChange}
+                                >
+                                    Видео
+                                </Button>
+                                <Button
+                                    color='secondary'
+                                    sx={{font: 'small-caps bold 17px/1 sans-serif'}}
+                                    onClick={captureChange}
+                                >
+                                    Захват экрана
+                                </Button>
                             </ButtonGroup>
                             <Box sx={{marginLeft: '10px'}}>
                                 <WindowIcon sx={{marginRight: '10px'}} onClick={changeView}/>

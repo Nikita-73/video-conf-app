@@ -1,0 +1,24 @@
+version: "3.7"
+networks:
+  nikita-net:
+    driver: bridge
+    attachable: true
+    name: nikita-net
+services:
+  socket_server:
+    image: socket_server:test
+    networks:
+      - nikita-net
+    restart: always
+  front:
+    image: front:test
+    ports:
+      - 443:443
+      - 80:80
+    networks:
+      - nikita-net
+    volumes:
+      - type: bind
+        source: certs
+        target: /etc/ssl
+    restart: always

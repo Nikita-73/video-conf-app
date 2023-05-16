@@ -4,10 +4,13 @@ const app = express()
 const fs = require('fs');
 const cors = require('cors')
 
+//const server = require('http').createServer(app)
+
 const server = require('https').createServer({
     key: fs.readFileSync(path.resolve('.cert/key.pem')),
     cert: fs.readFileSync(path.resolve('.cert/cert.pem'))
 }, app)
+
 
 const io = require('socket.io')(server, {
     cors: {
@@ -36,20 +39,25 @@ io.on('connection', socket => {
     shareRoomsInfo()
 
     socket.on(ACTIONS.ADD_MEMBER, ({roomIDMember, memberID, host, name, surname}) => {
-        if (!roomsMembers[roomIDMember] && host) {
-            roomsMembers[roomIDMember] = []
-            roomsMembers[roomIDMember].push({memberID, host, name, surname})
-        } else {
-            roomsMembers[roomIDMember].push({memberID, host, name, surname})
-        }
+        try {
+
+            if (!roomsMembers[roomIDMember] && host) {
+                roomsMembers[roomIDMember] = []
+                roomsMembers[roomIDMember].push({memberID, host, name, surname})
+            } else {
+                roomsMembers[roomIDMember].push({memberID, host, name, surname})
+            }
 
 
-        roomsMembers[roomIDMember].forEach(clients => {
-            io.to(clients.memberID).emit(ACTIONS.SHARE_ROOM_MEMBERS, {
-                roomMembersList: roomsMembers[roomIDMember]
+            roomsMembers[roomIDMember].forEach(clients => {
+                io.to(clients.memberID).emit(ACTIONS.SHARE_ROOM_MEMBERS, {
+                    roomMembersList: roomsMembers[roomIDMember]
+                })
+
             })
-
-        })
+        } catch (e) {
+            // сделано чтобы сервер не падал из-за неверного айдишника
+        }
     })
 
 

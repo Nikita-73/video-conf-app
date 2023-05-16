@@ -3,13 +3,14 @@ import socket from "../../socket";
 import ACTIONS from '../../socket/actions';
 import {useParams} from "react-router";
 import Drawer from '@mui/material/Drawer';
+import stateMembersRoom from '../../store/stateMembersRoom'
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
 import CancelIcon from '@mui/icons-material/Cancel';
-import stateMembersRoom from '../../store/stateMembersRoom'
+import PersonIcon from '@mui/icons-material/Person';
+
 
 
 const DrawerMemberUi = ({cartOpen, closeCart}) => {
@@ -53,13 +54,16 @@ const DrawerMemberUi = ({cartOpen, closeCart}) => {
     })
 
 
-
-
-
-
     return (
         <Drawer
             anchor="right"
+            PaperProps={{
+                sx: {
+                    backgroundColor: "#1e1e21",
+                    color: "white",
+                    font: 'small-caps bold 24px/1 sans-serif',
+                }
+            }}
             open={cartOpen}
             onClose={closeCart}
         >
@@ -71,20 +75,21 @@ const DrawerMemberUi = ({cartOpen, closeCart}) => {
                     {if (showIcon === true) {
                         return (<ListItem key={item.memberID}>
                             <ListItemIcon>
-                                <CancelIcon onClick={() => {handleRemoveMember(item)}}/>
+                                <CancelIcon sx={{color: 'white'}} onClick={() => {handleRemoveMember(item)}}/>
                             </ListItemIcon>
                             <ListItemText primary={`${item.name} ${item.surname}`} />
                         </ListItem>)
                     } else {
                         return (<ListItem key={item.memberID}>
                             <ListItemIcon>
-                                <InboxIcon/>
+                                <PersonIcon sx={{color: 'white'}} />
                             </ListItemIcon>
                             <ListItemText primary={`${item.name} ${item.surname}`} />
                         </ListItem>)
                     }}
                 })}
             </List>
+
         </Drawer>
     )
 };

@@ -10,6 +10,8 @@ import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import stateMembersRoom from '../../store/stateMembersRoom'
+import my_image from '../Main/fonts/image_first.jpg'
+
 
 
 const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
@@ -19,6 +21,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
     const [inputSurname, setInputSurname] = useState('')
     const [stateMicrophone, setStateMicrophone] = useState(true)
     const [stateVideo, setStateVideo] = useState(true)
+    const [stateButtonRoom, setStateButtonRoom] = useState(true)
 
     const colorMicrophoneButton = {
         color: stateMicrophone ? 'success' : 'error'
@@ -36,6 +39,15 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
         stateMembersRoom.setVideoSwitch(stateVideo)
     }, [stateVideo])
 
+    useEffect(() => {
+        if (inputRoom.length === 36) {
+            setStateButtonRoom(false)
+        } else {
+            setStateButtonRoom(true)
+        }
+
+    }, [inputRoom])
+
 
     return (
         <Grid container component="main" sx={{ height: '100vh' }}>
@@ -46,6 +58,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                 sm={4}
                 md={7}
                 sx={{
+                    backgroundImage: `url(${my_image})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundColor: (t) =>
                         t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
@@ -55,6 +68,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
             />
             <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
                 <Box
+
                     sx={{
                         my: 8,
                         mx: 4,
@@ -67,7 +81,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Sign in
+                        Авторизация
                     </Typography>
                     <Box component="form" noValidate sx={{ mt: 1 }}>
                         <TextField
@@ -76,7 +90,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                             name="firstName"
                             fullWidth
                             id="firstName"
-                            label="First Name"
+                            label="Имя"
                             autoFocus
                             value={inputName}
                             onChange={e => setInputName(e.target.value)}
@@ -85,7 +99,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                             margin="normal"
                             fullWidth
                             id="lastName"
-                            label="Last Name"
+                            label="Фамилия"
                             name="lastName"
                             autoComplete="family-name"
                             value={inputSurname}
@@ -95,7 +109,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                             margin="normal"
                             fullWidth
                             id="roomId"
-                            label="Room ID"
+                            label="Идентификатор комнаты"
                             name="roomId"
                             value={inputRoom}
                             onChange={e => setInputRoom(e.target.value)}
@@ -103,10 +117,11 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                         <Button
                             fullWidth
                             variant="contained"
+                            disabled={stateButtonRoom}
                             sx={{ mt: 3, mb: 2 }}
                             onClick={() => {joiningRoom(inputRoom, inputName, inputSurname)}}
                         >
-                            Connect
+                            Подключиться
                         </Button>
                         <Button
                             fullWidth
@@ -114,7 +129,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                             sx={{ mt: 3, mb: 2 }}
                             onClick={() => {createNewRoom(inputName, inputSurname)}}
                         >
-                            Create new room
+                            Создать новую комнату
                         </Button>
                         <Box
                         sx={{display: 'flex', justifyContent: 'space-between'}}
@@ -126,7 +141,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                                 sx={{ mt: 3, mb: 2, marginRight: '10px' }}
                                 onClick={() => {setStateMicrophone(prev => !prev)}}
                             >
-                                Audio
+                                Микрофон
                             </Button>
                             <Button
                                 fullWidth
@@ -135,7 +150,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                                 sx={{ mt: 3, mb: 2 }}
                                 onClick={() => {setStateVideo(prev => !prev)}}
                             >
-                                Video
+                                Веб-камера
                             </Button>
                         </Box>
                     </Box>
