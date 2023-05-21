@@ -54,12 +54,12 @@ const Room = observer(() => {    // observer можно убрать так ка
     }
 
     const exitRoomHandle = () => {
-        document.location.href = 'https://localhost:3000'
+        document.location.href = '/'
     }
 
     useEffect(() => {
         return () => {
-            document.location.href = 'https://localhost:3000'
+            document.location.href = '/'
         }
     }, [])
 
@@ -73,19 +73,20 @@ const Room = observer(() => {    // observer можно убрать так ка
         setStateChangeView(prev => prev === 6 ? 12 : 6)
     }
 
-    const changeViewSizeBoxVideo = () => {
-        if (stateChangeView === 6) {
-            return {maxHeight: '380px', maxWidth: '610px', position: 'relative'}
-        } else {
-            return {height: '100%', width: '100%', position: 'relative'}
-        }
-    }
 
     const changeViewSizeGridVideo = () => {
         if (stateChangeView === 6) {
-            return {maxHeight: '380px', maxWidth: '610px'}
+            return {maxHeight: '500px', maxWidth: '100%'}
         } else {
             return {height: '100%', width: '100%'}
+        }
+    }
+
+    const changeViewSizeBoxVideo = () => {
+        if (stateChangeView === 6) {
+            return {maxHeight: '500px', maxWidth: '670px', position: 'relative'}
+        } else {
+            return {height: '100%', width: '100%', position: 'relative'}
         }
     }
 
@@ -99,12 +100,13 @@ const Room = observer(() => {    // observer можно убрать так ка
 
     const changeViewTagNameVideo = () => {
         if (stateChangeView === 6) {
-            return {position: 'absolute', width: '100%', bottom:'-10px', left: '0',
+            return {position: 'absolute', width: '100%', bottom:'-55px', left: '0',
                 font: 'small-caps bold 24px/1 sans-serif', textAlign: 'center', boxSizing: 'border-box', color: 'white'}
         } else {
             return {display: 'none'}
         }
     }
+
 
     const tagName = (clientID) => {
         return stateMembersRoom.listMembers.map(item => {
@@ -124,24 +126,21 @@ const Room = observer(() => {    // observer можно убрать так ка
                       key={clientID}
                       sx={changeViewSizeGridVideo()}
                 >
-                    <Box sx={changeViewSizeBoxVideo()}
-                         className={changeViewBorderVideo()}
-                    >
-
-                        <video
-                            height='100%'
-                            width='100%'
-                            ref={instance => {
-                                provideMediaRef(clientID, instance);
-                            }}
-                            autoPlay
-                            playsInline
-                            muted={clientID === LOCAL_VIDEO}
-                        />
-                        <Box sx={changeViewTagNameVideo()}>
-                            {tagName(clientID)}
+                        <Box sx={changeViewSizeBoxVideo()}>
+                            div
+                                <video
+                                    className={changeViewBorderVideo()}
+                                    ref={instance => {
+                                        provideMediaRef(clientID, instance);
+                                    }}
+                                    autoPlay
+                                    playsInline
+                                    muted={clientID === LOCAL_VIDEO}
+                                />
+                            <Box sx={changeViewTagNameVideo()}>
+                                {tagName(clientID)}
+                            </Box>
                         </Box>
-                    </Box>
                 </Grid>
             );
         })
@@ -238,3 +237,22 @@ const Room = observer(() => {    // observer можно убрать так ка
 })
 
 export default Room;
+
+
+
+
+/*const changeViewSizeVideoHeight = () => {
+       if (stateChangeView === 6) {
+           return '344px'
+       } else {
+           return '100%'
+       }
+   }
+
+   const changeViewSizeVideoWidth = () => {
+       if (stateChangeView === 6) {
+           return '610px'
+       } else {
+           return '100%'
+       }
+   }*/
