@@ -4,19 +4,28 @@ const app = express()
 const fs = require('fs');
 const cors = require('cors')
 
-//const server = require('http').createServer(app)
-
-const server = require('https').createServer({
-    key: fs.readFileSync(path.resolve('.cert/key.pem')),
-    cert: fs.readFileSync(path.resolve('.cert/cert.pem'))
-}, app)
+const server = require('http').createServer(app)
 
 
 const io = require('socket.io')(server, {
     cors: {
-        origin: ['https://localhost:3000', 'https://192.168.0.141:3000'],
+        origin: ['http://localhost:3000', 'http://192.168.0.120:3000'],
     }
 })
+
+// const server = require('https').createServer({
+//     key: fs.readFileSync(path.resolve('.cert/key.pem')),
+//     cert: fs.readFileSync(path.resolve('.cert/cert.pem'))
+// }, app)
+
+
+// const io = require('socket.io')(server, {
+//     cors: {
+//         origin: ['https://localhost:3000', 'https://192.168.0.141:3000'],
+//     }
+// })
+
+
 
 const ACTIONS = require('./src/actions')
 const {validate, version} = require("uuid");

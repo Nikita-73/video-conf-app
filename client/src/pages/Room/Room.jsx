@@ -12,6 +12,7 @@ import WindowIcon from '@mui/icons-material/Window';
 import CopyAllIcon from '@mui/icons-material/CopyAll';
 import CircularProgress from '@mui/material/CircularProgress';
 import '../Room/styles/RoomBorderVideo.css'
+import '../Room/styles/RoomBorderVideoShow.css'
 
 
 
@@ -86,7 +87,7 @@ const Room = observer(() => {    // observer можно убрать так ка
         if (stateChangeView === 6) {
             return {maxHeight: '500px', maxWidth: '670px', position: 'relative'}
         } else {
-            return {height: '100%', width: '100%', position: 'relative'}
+            return {height: '100%', width: '100%', marginBottom: '2000px', position: 'relative'}
         }
     }
 
@@ -94,13 +95,13 @@ const Room = observer(() => {    // observer можно убрать так ка
         if (stateChangeView === 6) {
             return 'gradient-border'
         } else {
-            return ''
+            return 'show-video'
         }
     }
 
     const changeViewTagNameVideo = () => {
         if (stateChangeView === 6) {
-            return {position: 'absolute', width: '100%', bottom:'-55px', left: '0',
+            return {position: 'absolute', width: '569px', bottom:'-30px', left: '0',
                 font: 'small-caps bold 24px/1 sans-serif', textAlign: 'center', boxSizing: 'border-box', color: 'white'}
         } else {
             return {display: 'none'}
@@ -127,16 +128,15 @@ const Room = observer(() => {    // observer можно убрать так ка
                       sx={changeViewSizeGridVideo()}
                 >
                         <Box sx={changeViewSizeBoxVideo()}>
-                            div
-                                <video
-                                    className={changeViewBorderVideo()}
-                                    ref={instance => {
-                                        provideMediaRef(clientID, instance);
-                                    }}
-                                    autoPlay
-                                    playsInline
-                                    muted={clientID === LOCAL_VIDEO}
-                                />
+                            <video
+                                className={changeViewBorderVideo()}
+                                ref={instance => {
+                                    provideMediaRef(clientID, instance);
+                                }}
+                                autoPlay
+                                playsInline
+                                muted={clientID === LOCAL_VIDEO}
+                            />
                             <Box sx={changeViewTagNameVideo()}>
                                 {tagName(clientID)}
                             </Box>
@@ -173,7 +173,7 @@ const Room = observer(() => {    // observer можно убрать так ка
 
 
     return (
-        <>
+        <div style={{height: "100%", width:'100%'}}>
             <Box sx={{
                 height: '100%',
                 width: '100%',
@@ -232,7 +232,7 @@ const Room = observer(() => {    // observer можно убрать так ка
                 </Box>
             </Box>
             <DrawerMemberUI cartOpen={stateDrawer} closeCart={() => setStateDrawer(false)}/>
-        </>
+        </div>
     );
 })
 

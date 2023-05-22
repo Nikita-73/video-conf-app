@@ -81,7 +81,7 @@ const MainTemplateUI = ({joiningRoom, createNewRoom}) => {
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Авторизация
+                        Форма входа
                     </Typography>
                     <Box component="form" noValidate sx={{ mt: 1 }}>
                         <TextField
